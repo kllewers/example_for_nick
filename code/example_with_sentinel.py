@@ -39,7 +39,7 @@ training = sentinel_data.sampleRegions(
     ee.Feature(water, {'class': 2})
   ]),
   properties=['class'],
-  scale=30
+  scale=20
 )
 
 # Train a classifier.
