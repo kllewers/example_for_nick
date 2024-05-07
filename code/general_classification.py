@@ -4,7 +4,7 @@ import folium
 ee.Authenticate()
 ee.Initialize(project='ee-krle4401')
 
-# Define the new center of the circle using longitude and latitude
+# Making an ROI/AOI based on a circle, should be able to upload shapefile path, too
 center_point = ee.Geometry.Point([19.84332462338792, -34.737038455808126])
 radius = 5000  # meters
 area_of_interest = center_point.buffer(radius)
@@ -13,16 +13,16 @@ area_of_interest = center_point.buffer(radius)
 sentinel_data = ee.ImageCollection("COPERNICUS/S2_HARMONIZED") \
     .filterDate('2020-01-01', '2022-01-10') \
     .filterBounds(area_of_interest) \
-    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))  # Filtering out cloudy images
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))  #the 20 param, only allows for images with less than 20% cloud cover
 
 # Function to mask clouds based on the Sentinel-2 QA band
 def maskS2clouds(image):
-    qa = image.select('QA60')
-    cloudBitMask = 1 << 10
-    cirrusBitMask = 1 << 11
+    qa = image.select('QA60') 
+    cloudBitMask = 1 << 10 #bit 10 on Sentinel is clouds
+    cloudshadowBitMask = 1 << 11 #bit 11 on Sentinel is cloud shadow
     mask = qa.bitwiseAnd(cloudBitMask).eq(0) \
-             .And(qa.bitwiseAnd(cirrusBitMask).eq(0))
-    return image.updateMask(mask).divide(10000)
+             .And(qa.bitwiseAnd(cloudshadowBitMask).eq(0))
+    return image.updateMask(mask).divide(10000) #dividing by DNs
 
 # Apply the cloud mask
 sentinel_data = sentinel_data.map(maskS2clouds).median()
