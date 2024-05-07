@@ -5,8 +5,15 @@ ee.Authenticate()
 
 ee.Initialize(project='ee-krle4401')
 
-# Define your area of interest
-area_of_interest = ee.Geometry.Rectangle([73.687, 18.524, 74.213, 18.985])  # Example coordinates
+# Define the center of the circle using longitude and latitude
+center_point = ee.Geometry.Point([-34.737709, 19.831708])
+
+# Define the radius in meters
+radius = 5000  # 5000 meters (5 kilometers)
+
+# Create a circle geometry
+area_of_interest = center_point.buffer(radius)
+
 
 # Load Sentinel-2 data
 sentinel_data = ee.ImageCollection("COPERNICUS/S2_HARMONIZED") \
@@ -76,8 +83,6 @@ my_map.add_child(folium.LayerControl())
 
 # Display the map.
 my_map'''
-
-import folium
 
 # Function to add Earth Engine layers
 def add_ee_layer(self, ee_image_object, vis_params, name):
